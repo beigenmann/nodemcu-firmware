@@ -159,6 +159,8 @@ sinclude $(PDIR)Makefile
 
 $(BINODIR)/%.bin: $(IMAGEODIR)/%.out
 	@mkdir -p $(BINODIR)
+	$(ESPTOOL) -eo $<  -bo $@.FLASH -bs .text -bs .data -bs .rodata -bc -ec
+	$(OBJCOPY) --only-section .irom0.text -O binary $< $@.irom0text.bin
 	$(OBJCOPY) -O binary $< $@
 
 .PHONY: FORCE

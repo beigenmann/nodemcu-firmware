@@ -9,6 +9,7 @@ CC = xt-xcc
 NM = xt-nm
 CPP = xt-cpp
 OBJCOPY = xt-objcopy
+ESPTOOL = esptool
 #MAKE = xt-make
 
 CSRCS ?= $(wildcard *.c)
@@ -40,7 +41,6 @@ CCFLAGS += 			\
 	-g			\
 	-O2			\
 	-Wpointer-arith		\
-	-Wundef			\
 	-Werror			\
 	-Wl,-EL			\
 	-fno-inline-functions	\
@@ -80,9 +80,6 @@ $$(IMAGEODIR)/$(1).out: $$(OBJS) $$(DEP_OBJS_$(1)) $$(DEP_LIBS_$(1)) $$(DEPENDS_
 	$$(CC) $$(LDFLAGS) $$(if $$(LINKFLAGS_$(1)),$$(LINKFLAGS_$(1)),$$(LINKFLAGS_DEFAULT) $$(OBJS) $$(DEP_OBJS_$(1)) $$(DEP_LIBS_$(1))) -o $$@ 
 endef
 
-$(BINODIR)/%.bin: $(IMAGEODIR)/%.out
-	@mkdir -p $(BINODIR)
-	$(OBJCOPY) -O binary $< $@
 
 #############################################################
 # Rules base
@@ -169,6 +166,7 @@ $(foreach image,$(GEN_IMAGES),$(eval $(call MakeImage,$(basename $(image)))))
 # Required for each makefile to inherit from the parent
 #
 
-INCLUDES := $(INCLUDES) -I $(PDIR)include -I $(PDIR)include/$(TARGET)
+INCLUDES := $(INCLUDES) -I $(PDIR)include -I $(PDIR)include/$(TARGET) -I /opt/Espressif/ESP8266_SDK/include
+
 PDIR := ../$(PDIR)
 sinclude $(PDIR)Makefile
