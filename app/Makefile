@@ -84,6 +84,7 @@ COMPONENTS_eagle.app.v6 = \
 
 LINKFLAGS_eagle.app.v6 = \
 	-L../lib        \
+        -L/opt/Espressif/ESP8266_SDK/lib        \
 	-nostdlib	\
     -T$(LD_FILE)   \
 	-Wl,--no-check-sections	\
