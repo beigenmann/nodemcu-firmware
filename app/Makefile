@@ -84,6 +84,7 @@ COMPONENTS_eagle.app.v6 = \
 
 LINKFLAGS_eagle.app.v6 = \
 	-L../lib        \
+        -L/opt/Espressif/ESP8266_SDK/lib        \
 	-nostdlib	\
     -T$(LD_FILE)   \
 	-Wl,--no-check-sections	\
@@ -159,6 +160,8 @@ sinclude $(PDIR)Makefile
 
 $(BINODIR)/%.bin: $(IMAGEODIR)/%.out
 	@mkdir -p $(BINODIR)
+	$(ESPTOOL) -eo $<  -bo $@.FLASH -bs .text -bs .data -bs .rodata -bc -ec
+	$(OBJCOPY) --only-section .irom0.text -O binary $< $@.irom0text.bin
 	$(OBJCOPY) -O binary $< $@
 
 .PHONY: FORCE
