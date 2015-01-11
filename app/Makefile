@@ -158,13 +158,16 @@ sinclude $(PDIR)Makefile
 #  generate bin file
 #
 
+ifeq ($(OS),Windows_NT)
+	PORT = com1
+else
+	PORT = /dev/ttyUSB0
+endif
+
 $(BINODIR)/%.bin: $(IMAGEODIR)/%.out
 	@mkdir -p $(BINODIR)
-	/opt/Espressif/esptool-py/esptool.py elf2image  $< 
-	$(ESPTOOL) -eo $<  -bo $@.FLASH -bs .text -bs .data -bs .rodata -bc -ec
-	$(OBJCOPY) --only-section .irom0.text -O binary $< $@.irom0text.bin
-	$(OBJCOPY) -O binary $< $@
+	../tools/esptool.py elf2image $< -o $(FIRMWAREDIR)
+
 
 .PHONY: FORCE
 FORCE:
-
