@@ -1,13 +1,14 @@
 # **NodeMcu** #
 version 0.9.5
 ###A lua based firmware for wifi-soc esp8266
-Build on [ESP8266 sdk 0.9.5](http://bbs.espressif.com/viewtopic.php?f=7&t=104)<br />
+Build on [ESP8266 sdk 0.9.5](http://bbs.espressif.com/viewtopic.php?f=5&t=154)<br />
 Lua core based on [eLua project](http://www.eluaproject.net/)<br />
 File system based on [spiffs](https://github.com/pellepl/spiffs)<br />
 Open source development kit for NodeMCU [nodemcu-devkit](https://github.com/nodemcu/nodemcu-devkit)<br />
 Flash tool for NodeMCU [nodemcu-flasher](https://github.com/nodemcu/nodemcu-flasher)<br />
 
 wiki: [nodemcu wiki](https://github.com/nodemcu/nodemcu-firmware/wiki)<br />
+api: [nodemcu api](https://github.com/nodemcu/nodemcu-firmware/wiki/nodemcu_api_en)<br />
 home: [nodemcu.com](http://www.nodemcu.com)<br />
 bbs: [Chinese bbs](http://bbs.nodemcu.com)<br />
 Tencent QQ group: 309957875<br />
@@ -16,16 +17,35 @@ Tencent QQ group: 309957875<br />
 - Easy to access wireless router
 - Based on Lua 5.1.4 (without *io, math, debug, os* module.)
 - Event-Drive programming preferred.
-- Build-in file, timer, pwm, i2c, 1-wire, net, gpio, wifi, adc, uart and system api.
+- Build-in file, timer, pwm, i2c, spi, 1-wire, net, mqtt, gpio, wifi, adc, uart and system api.
 - GPIO pin re-mapped, use the index to access gpio, i2c, pwm.
 
 # To Do List (pull requests are very welcomed)
 - fix wifi smart connect
-- add spi module
-- add mqtt module
+- add spi module (done)
+- add mqtt module (done)
 - add coap module
+- cross compiler
 
 # Change log
+2015-01-27<br />
+support floating point LUA.<br />
+use macro LUA_NUMBER_INTEGRAL in user_config.h control this feature.<br />
+LUA_NUMBER_INTEGRAL to disable floating point support,<br />
+// LUA_NUMBER_INTEGRAL to enable floating point support.<br />
+build pre_build bin.
+
+2015-01-26<br />
+applied sdk095_patch1 to sdk 0.9.5.<br />
+added LUA examples and modules [by dvv](https://github.com/dvv). <br />
+added node.readvdd33() API [by alonewolfx2](https://github.com/alonewolfx2).<br />
+build pre_build bin.
+
+2015-01-24<br />
+migrate to sdk 0.9.5 release.<br />
+tmr.time() now return second(not precise yet). <br />
+build pre_build bin.
+
 2015-01-23<br />
 merge mqtt branch to master.<br />
 build pre_build bin.
@@ -43,8 +63,7 @@ fix net.socket:send() issue when multi sends are called. <br />
 fix file.read() api, take 0xFF as a regular byte, not EOF.<br />
 pre_build/latest/nodemcu_512k_latest.bin is removed. use pre_build/latest/nodemcu_latest.bin instead.
 
-[more change log](https://github.com/nodemcu/nodemcu-firmware/wiki/nodemcu_api_en#change_log)<br />
-[more change_log cn](https://github.com/nodemcu/nodemcu-firmware/wiki/nodemcu_api_cn#change_log)
+[more change log](https://github.com/nodemcu/nodemcu-firmware/wiki)<br />
 
 ##GPIO NEW TABLE ( Build 20141219 and later)
 
@@ -80,39 +99,6 @@ pre_build/latest/nodemcu_512k_latest.bin is removed. use pre_build/latest/nodemc
 </table>
 #### [*] D0(GPIO16) can only be used as gpio read/write. no interrupt supported. no pwm/i2c/ow supported.
 
-##GPIO OLD TABLE (Before build 20141212)
-
-<a id="old_gpio_map"></a>
-<table>
-  <tr>
-    <th scope="col">IO index</th><th scope="col">ESP8266 pin</th><th scope="col">IO index</th><th scope="col">ESP8266 pin</th>
-  </tr>
-  <tr>
-    <td>0</td><td>GPIO12</td><td>8</td><td>GPIO0</td>
-  </tr>
-  <tr>
-    <td>1</td><td>GPIO13</td><td>9</td><td>GPIO2</td>
-   </tr>
-   <tr>
-    <td>2</td><td>GPIO14</td><td>10</td><td>GPIO4</td>
-  </tr>
-  <tr>
-    <td>3</td><td>GPIO15</td><td>11</td><td>GPIO5</td>
-   </tr>
-   <tr>
-    <td>4</td><td>GPIO3</td><td></td><td></td>
-  </tr>
-  <tr>
-    <td>5</td><td>GPIO1</td><td></td><td></td>
-   </tr>
-   <tr>
-    <td>6</td><td>GPIO9</td><td></td><td></td>
-  </tr>
-  <tr>
-    <td>7</td><td>GPIO10</td<td></td><td></td>
-   </tr>
-</table>
-
 #Build option
 ####file ./app/include/user_config.h
 ```c
@@ -137,6 +123,8 @@ pre_build/latest/nodemcu_512k_latest.bin is removed. use pre_build/latest/nodemc
 #define LUA_USE_MODULES_OW
 #define LUA_USE_MODULES_BIT
 #endif /* LUA_USE_MODULES */
+...
+// LUA_NUMBER_INTEGRAL
 ```
 
 #Flash the firmware
@@ -145,10 +133,8 @@ for most esp8266 modules, just pull GPIO0 down and restart.<br />
 You can use the [nodemcu-flasher](https://github.com/nodemcu/nodemcu-flasher) to burn the firmware.
 
 Or, if you build your own bin from source code.<br />
-eagle.app.v6.flash.bin: 0x00000<br />
-eagle.app.v6.irom0text.bin: 0x10000<br />
-esp_init_data_default.bin: 0x7c000<br />
-blank.bin: 0x7e000<br />
+0x00000.bin: 0x00000<br />
+0x10000.bin: 0x10000<br />
 
 *Better run file.format() after flash*
 
@@ -190,6 +176,20 @@ baudrate:9600
         .."Connection: keep-alive\r\nAccept: */*\r\n\r\n")
 ```
 
+####Or a simple http server
+   
+```lua
+    -- A simple http server
+    srv=net.createServer(net.TCP) 
+    srv:listen(80,function(conn) 
+      conn:on("receive",function(conn,payload) 
+        print(payload) 
+        conn:send("<h1> Hello, NodeMcu.</h1>")
+      end) 
+      conn:on("sent",function(conn) conn:close() end)
+    end)
+```
+
 ####Connect to MQTT Broker
 
 ```lua
@@ -226,18 +226,18 @@ m:close();
 
 ```
 
-####Or a simple http server
-   
+#### UDP client and server
 ```lua
-    -- A simple http server
-    srv=net.createServer(net.TCP) 
-    srv:listen(80,function(conn) 
-      conn:on("receive",function(conn,payload) 
-        print(payload) 
-        conn:send("<h1> Hello, NodeMcu.</h1>")
-      end) 
-      conn:on("sent",function(conn) conn:close() end)
-    end)
+-- a udp server
+s=net.createServer(net.UDP) 
+s:on("receive",function(s,c) print(c) end)
+s:listen(5683)
+
+-- a udp client
+cu=net.createConnection(net.UDP) 
+cu:on("receive",function(cu,c) print(c) end) 
+cu:connect(5683,"192.168.18.101") 
+cu:send("hello")
 ```
 
 ####Do something shining
